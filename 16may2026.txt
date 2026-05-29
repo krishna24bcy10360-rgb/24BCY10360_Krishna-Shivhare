@@ -1,0 +1,47 @@
+CREATE DATABASE VITCampus;
+USE VITCampus;
+
+-- CREATE TABLE FOR CSE DEPARTMENT
+CREATE TABLE CSE (
+    student_id VARCHAR(15) PRIMARY KEY,
+    student_name VARCHAR(50) NOT NULL,
+    student_marks VARCHAR(10) NOT NULL
+);
+
+-- INSERTING VALUES INTO CSE (Your details updated here)
+INSERT INTO CSE (student_id, student_name, student_marks) VALUES
+('24BCY10360', 'Krishna Shivhare', '92/100'),
+('24BCE10023', 'Arjun Sharma', '88/100'),
+('24BCE10047', 'Priya Iyer', '94/100'),
+('24BCY10112', 'Rohan Mehta', '76/100'),
+('24BCE10089', 'Ananya Reddy', '85/100');
+
+-- CREATE TABLE FOR ECE DEPARTMENT
+CREATE TABLE ECE (
+    student_id VARCHAR(15) PRIMARY KEY,
+    student_name VARCHAR(50) NOT NULL,
+    student_marks VARCHAR(10) NOT NULL
+);
+
+-- INSERTING VALUES INTO ECE (Your details updated here)
+INSERT INTO ECE (student_id, student_name, student_marks) VALUES
+('24BCY10360', 'Krishna Shivhare', '87/100'),
+('24BCE10023', 'Arjun Sharma', '79/100'),
+('24BCE10047', 'Priya Iyer', '91/100'),
+('24BCY10112', 'Rohan Mehta', '82/100'),
+('24BCE10089', 'Ananya Reddy', '74/100');
+
+-- CREATE TABLE FOR MECH DEPARTMENT
+CREATE TABLE MECH (
+    student_id VARCHAR(15) PRIMARY KEY,
+    student_name VARCHAR(50) NOT NULL,
+    student_marks VARCHAR(10) NOT NULL
+);
+
+-- INSERTING VALUES INTO MECH (Your details updated here)
+INSERT INTO MECH (student_id, student_name, student_marks) VALUES
+('24BCY10360', 'Krishna Shivhare', '95/100'),
+('24BCE10023', 'Arjun Sharma', '83/100'),
+('24BCE10047', 'Priya Iyer', '89/100'),
+('24BCY10112', 'Rohan Mehta', '71/100'),
+('24BCE10089', 'Ananya Reddy', '90/100');
