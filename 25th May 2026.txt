@@ -1,0 +1,18 @@
+// 1. Show all existing collections in the database
+show collections;
+
+// 2. Inserting a new document into the Employee collection (Your details updated)
+db.Employee.insertOne({
+    name: 'Krishna', 
+    department: 'CSE'
+});
+
+// 3. Inserting another document with different fields (Demonstrating Schemaless nature)
+db.Employee.insertOne({
+    name: 'Sanskrit', 
+    marks: '93', 
+    location: 'Bihar'
+});
+
+// 4. Fetching and displaying all documents from the Employee collection
+db.Employee.find().pretty();
