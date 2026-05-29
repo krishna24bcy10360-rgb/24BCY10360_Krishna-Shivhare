@@ -1,0 +1,89 @@
+-- =========================================================
+-- [21 MAY 2026] - Aggregations, Group By, Having & Subqueries
+-- =========================================================
+USE VITCampus;
+
+-- 1. Review complete initial worker data
+SELECT * FROM worker;
+
+-- 2. Sorting filtered records (Admin department sorted by highest salary)
+SELECT first_name, department, salary 
+FROM worker
+WHERE department = 'Admin' 
+ORDER BY salary DESC;
+
+-- 3. Counting specific workers using OR condition
+SELECT COUNT(worker_id) AS Total_Admin_And_HR 
+FROM worker 
+WHERE department='Admin' OR department = 'HR';
+
+-- 4. GROUP BY with COUNT and Alphabetical Sorting
+SELECT department, COUNT(department) AS Number_Of_Workers
+FROM worker
+GROUP BY department 
+ORDER BY department ASC;
+
+-- 5. Total Salary expenditure per Department
+SELECT department, SUM(salary) AS Total_Department_Salary
+FROM worker 
+GROUP BY department;
+
+-- 6. Filtering Groups using HAVING Clause (Departments with 3 or more workers)
+SELECT department, COUNT(department) AS Large_Departments
+FROM worker
+GROUP BY department 
+HAVING COUNT(department) >= 3 
+ORDER BY department ASC;
+
+-- 7. Filtering Groups based on Total Salary Budget
+SELECT department, SUM(salary) AS Low_Budget_Departments
+FROM worker
+GROUP BY department 
+HAVING SUM(salary) < 300000;
+
+-- 8. Pagination using LIMIT and OFFSET (Fetches 4 records starting from row 4)
+SELECT * FROM worker 
+LIMIT 4 OFFSET 3;
+
+
+-- =========================================================
+-- Subquery Demonstration (Nested Queries)
+-- =========================================================
+-- Creating a temporary 'toppers' filter table
+DROP TABLE IF EXISTS toppers;
+CREATE TABLE toppers (
+    id INT
+);
+
+INSERT INTO toppers VALUES (5);
+SELECT * FROM toppers;
+
+-- Fetching worker details matching IDs present in the toppers table
+SELECT worker_id, first_name, department 
+FROM worker
+WHERE worker_id IN (SELECT id FROM toppers);
+
+
+-- =========================================================
+-- Advanced Limit & Analytics Tasks
+-- =========================================================
+-- Bottom 2 departments with the lowest total salary budgets
+SELECT department, SUM(salary) AS Total_Salary
+FROM worker
+GROUP BY department 
+ORDER BY SUM(salary) ASC 
+LIMIT 2;
+
+-- Finding the 2nd Highest Salary holder in the Admin department
+SELECT worker_id, first_name, last_name, salary 
+FROM worker 
+WHERE department='Admin'
+ORDER BY salary DESC 
+LIMIT 1 OFFSET 1;
+
+-- Finding the 2nd highest salary rank grouped by department metrics safely
+SELECT department, MAX(salary) AS Second_Highest_Max_Salary
+FROM worker
+WHERE salary < (SELECT MAX(salary) FROM worker)
+GROUP BY department
+LIMIT 1;
