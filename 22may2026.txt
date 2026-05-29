@@ -1,0 +1,66 @@
+-- =========================================================
+-- [22 MAY 2026] - SQL Joins (Cross, Inner, Natural, Left)
+-- =========================================================
+USE VITCampus;
+
+-- 1. SETUP DEPARTMENTS TABLE (Parent/First Table)
+DROP TABLE IF EXISTS departments;
+CREATE TABLE departments (
+    did INT PRIMARY KEY,
+    dname VARCHAR(25) NOT NULL UNIQUE
+);
+
+INSERT INTO departments VALUES
+(101, 'CSE'),
+(102, 'ECE'),
+(103, 'civil'),
+(106, 'Aero'),
+(107, 'Mech');
+
+SELECT * FROM departments ORDER BY did ASC;
+
+
+-- 2. SETUP HOD TABLE (Second Table)
+DROP TABLE IF EXISTS HOD;
+CREATE TABLE HOD (
+    Hid INT PRIMARY KEY,
+    hname VARCHAR(20) NOT NULL UNIQUE
+);
+
+INSERT INTO HOD VALUES
+(101, 'Arun'),
+(102, 'Jayanth'),
+(104, 'Karthik'),
+(105, 'Murali');
+
+SELECT * FROM HOD;
+
+
+-- =========================================================
+-- [FIRSTQUERY] - Cross Join
+-- =========================================================
+-- CROSS JOIN combines every row of departments with every row of HOD
+SELECT * FROM departments 
+CROSS JOIN HOD 
+ORDER BY did ASC;
+
+
+-- =========================================================
+-- [SECONDQUERY] - Inner, Natural, and Outer Joins
+-- =========================================================
+
+-- 1. INNER JOIN (Fetches matching records where did equals hid)
+SELECT * FROM departments 
+INNER JOIN HOD ON departments.did = HOD.Hid;
+
+-- 2. NATURAL JOIN 
+-- Note: Natural join implicitly looks for columns with the same name. 
+-- Since tables have 'did' and 'Hid' (different names/cases), it might act as a cross join 
+-- or match common columns depending on the SQL strict mode, keeping it as per lab standard:
+SELECT * FROM departments 
+NATURAL JOIN HOD;
+
+-- 3. LEFT OUTER JOIN (Fetches all records from departments, and matching rows from HOD)
+SELECT * FROM departments 
+LEFT OUTER JOIN HOD ON (departments.did = HOD.Hid) 
+ORDER BY did ASC;
