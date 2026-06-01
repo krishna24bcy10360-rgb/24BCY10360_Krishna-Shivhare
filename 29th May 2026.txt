@@ -1,0 +1,117 @@
+// =========================================================================
+// [29 MAY 2026] - MongoDB Sorting, Pagination & Field Update Operators ($set, $inc, $min, $max)
+// =========================================================================
+
+// 1. Dataset Setup
+db.products.drop();
+
+db.products.insertMany([
+    { "_id" : 1, "name" : "xPhone", "price" : 799, "releaseDate" : ISODate("2011-05-14T00:00:00Z"), "spec" : { "ram" : 4, "screen" : 6.5, "cpu" : 2.66 }, "color" : [ "white", "black" ], "storage" : [ 64, 128, 256 ] },
+    { "_id" : 2, "name" : "xTablet", "price" : 899, "releaseDate" : ISODate("2011-09-01T00:00:00Z"), "spec" : { "ram" : 16, "screen" : 9.5, "cpu" : 3.66 }, "color" : [ "white", "black", "purple" ], "storage" : [ 128, 256, 512 ] },
+    { "_id" : 3, "name" : "SmartTablet", "price" : 899, "releaseDate" : ISODate("2015-01-14T00:00:00Z"), "spec" : { "ram" : 12, "screen" : 9.7, "cpu" : 3.66 }, "color" : [ "blue" ], "storage" : [ 16, 64, 128 ] },
+    { "_id" : 4, "name" : "SmartPad", "price" : 699, "releaseDate" : ISODate("2020-05-14T00:00:00Z"), "spec" : { "ram" : 8, "screen" : 9.7, "cpu" : 1.66 }, "color" : [ "white", "orange", "gold", "gray" ], "storage" : [ 128, 256, 1024 ] },
+    { "_id" : 5, "name" : "SmartPhone", "price" : 599, "releaseDate" : ISODate("2022-09-14T00:00:00Z"), "spec" : { "ram" : 4, "screen" : 9.7, "cpu" : 1.66 }, "color" : [ "white", "orange", "gold", "gray" ], "storage" : [ 128, 256 ] },
+    { "_id" : 6, "name" : "xWidget", "spec" : { "ram" : 64, "screen" : 9.7, "cpu" : 3.66 }, "color" : [ "black" ], "storage" : [ 1024 ] },
+    { "_id" : 7, "name" : "xReader", "price" : null, "spec" : { "ram" : 64, "screen" : 6.7, "cpu" : 3.66 }, "color" : [ "black", "white" ], "storage" : [ 128 ] }
+]);
+
+
+// 2. Advanced Multi-Key Sorting and Filtering
+db.products.find({ 'price': { $exists: 1 } }, { name: 1, price: 1 });
+db.products.find({ 'price': { $exists: 1 } }, { name: 1, price: 1 }).sort({ price: 1 });
+db.products.find({ 'price': { $exists: 1 } }, { name: 1, price: 1 }).sort({ price: -1 });
+
+// Sorting by price (ascending) and resolving ties with name (ascending)
+db.products.find({ 'price': { $exists: 1 } }, { name: 1, price: 1 }).sort({ price: 1, name: 1 });
+
+// Sorting by price (ascending) and resolving ties with name (descending)
+db.products.find({ 'price': { $exists: 1 } }, { name: 1, price: 1 }).sort({ price: 1, name: -1 });
+
+
+// 3. Date and Embedded Document Object Sorting
+db.products.find({ releaseDate: { $exists: 1 } }, { name: 1, releaseDate: 1 }).sort({ releaseDate: 1 });
+db.products.find({ releaseDate: { $exists: 1 } }, { name: 1, releaseDate: 1 }).sort({ releaseDate: -1 });
+db.products.find({}, { name: 1, spec: 1 }).sort({ "spec.ram": 1 });
+
+
+// 4. Pagination Techniques Using Limit & Skip
+db.products.find({}, { name: 1, price: 1 }).sort({ price: -1 }).limit(1);
+db.products.find({}, { name: 1, price: 1 }).sort({ price: -1, name: 1 }).limit(1);
+
+// Skipping first 2 matched data slots and evaluating next 2 segments
+db.products.find({}, { name: 1, price: 1 }).sort({ price: -1, name: 1 }).skip(2).limit(2);
+
+
+// 5. Explicit Data Injections & Schema Tweak Using $set
+db.products.drop();
+db.products.insertMany([
+    { "_id" : 1, "name" : "xPhone", "price" : 799, "releaseDate": ISODate("2011-05-14"), "spec" : { "ram" : 4, "screen" : 6.5, "cpu" : 2.66 },"color":["white","black"],"storage":[64,128,256]},
+    { "_id" : 2, "name" : "xTablet", "price" : 899, "releaseDate": ISODate("2011-09-01") , "spec" : { "ram" : 16, "screen" : 9.5, "cpu" : 3.66 },"color":["white","black","purple"],"storage":[128,256,512]},
+    { "_id" : 3, "name" : "SmartTablet", "price" : 899, "releaseDate": ISODate("2015-01-14"), "spec" : { "ram" : 12, "screen" : 9.7, "cpu" : 3.66 },"color":["blue"],"storage":[16,64,128]},
+    { "_id" : 4, "name" : "SmartPad", "price" : 699, "releaseDate": ISODate("2020-05-14"),"spec" : { "ram" : 8, "screen" : 9.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256,1024]},
+    { "_id" : 5, "name" : "SmartPhone", "price" : 599,"releaseDate": ISODate("2022-09-14"), "spec" : { "ram" : 4, "screen" : 5.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256]}
+]);
+
+// Single Document Field Modification
+db.products.updateOne({ _id: 1 }, { $set: { price: 899 } });
+db.products.findOne({ _id: 1 }, { name: 1, price: 1 });
+
+// Setting an exact attribute state value to null
+db.products.updateOne({ price: 899 }, { $set: { price: null } });
+
+// Modifying nested object document layers
+db.products.updateOne({ _id: 4 }, { $set: { "spec.ram": 16, "spec.screen": 10.7, "spec.cpu": 2.66 } });
+
+// Explicit Array Index target updating
+db.products.updateOne({ _id: 4 }, { $set: { "storage.0": 16, "storage.1": 32 } });
+
+
+// 6. Bulk State Update Implementations Using updateMany
+db.products.drop();
+db.products.insertMany([
+    { "_id" : 1, "name" : "xPhone", "price" : 799, "releaseDate": ISODate("2011-05-14"), "spec" : { "ram" : 4, "screen" : 6.5, "cpu" : 2.66 },"color":["white","black"],"storage":[64,128,256]},
+    { "_id" : 2, "name" : "xTablet", "price" : 899, "releaseDate": ISODate("2011-09-01") , "spec" : { "ram" : 16, "screen" : 9.5, "cpu" : 3.66 },"color":["white","black","purple"],"storage":[128,256,512]},
+    { "_id" : 3, "name" : "SmartTablet", "price" : 899, "releaseDate": ISODate("2015-01-14"), "spec" : { "ram" : 12, "screen" : 9.7, "cpu" : 3.66 },"color":["blue"],"storage":[16,64,128]},
+    { "_id" : 4, "name" : "SmartPad", "price" : 699, "releaseDate": ISODate("2020-05-14"),"spec" : { "ram" : 8, "screen" : 9.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256,1024]},
+    { "_id" : 5, "name" : "SmartPhone", "price" : 599,"releaseDate": ISODate("2022-09-14"), "spec" : { "ram" : 4, "screen" : 5.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256]}
+]);
+
+db.products.updateMany({ price: 899 }, { $set: { price: 895 } });
+db.products.updateMany({ price: { $gt: 700 } }, { $set: { "spec.ram": 32, "spec.screen": 9.8, "spec.cpu": 5.66 } });
+db.products.updateMany({ _id: { $in: [1, 2, 3] } }, { $set: { "storage.0": 16, "storage.1": 32 } });
+
+
+// 7. Numeric Value Modifications ($inc)
+db.products.drop();
+db.products.insertMany([
+    { "_id" : 1, "name" : "xPhone", "price" : 799, "releaseDate": ISODate("2011-05-14"), "spec" : { "ram" : 4, "screen" : 6.5, "cpu" : 2.66 },"color":["white","black"],"storage":[64,128,256]},
+    { "_id" : 2, "name" : "xTablet", "price" : 899, "releaseDate": ISODate("2011-09-01") , "spec" : { "ram" : 16, "screen" : 9.5, "cpu" : 3.66 },"color":["white","black","purple"],"storage":[128,256,512]},
+    { "_id" : 3, "name" : "SmartTablet", "price" : 899, "releaseDate": ISODate("2015-01-14"), "spec" : { "ram" : 12, "screen" : 9.7, "cpu" : 3.66 },"color":["blue"],"storage":[16,64,128]},
+    { "_id" : 4, "name" : "SmartPad", "price" : 699, "releaseDate": ISODate("2020-05-14"),"spec" : { "ram" : 8, "screen" : 9.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256,1024]},
+    { "_id" : 5, "name" : "SmartPhone", "price" : 599,"releaseDate": ISODate("2022-09-14"), "spec" : { "ram" : 4, "screen" : 5.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256]}
+]);
+
+db.products.updateOne({ _id: 1 }, { $inc: { price: 50 } });
+db.products.updateOne({ _id: 1 }, { $inc: { price: -150 } });
+
+// Simultaneous value increment over multiple fields
+db.products.updateOne({ _id: 1 }, { $inc: { price: 50, "spec.ram": 4 } });
+
+
+// 8. Conditional Limits Evaluation Logging ($min and $max)
+db.products.drop();
+db.products.insertMany([
+    { "_id" : 1, "name" : "xPhone", "price" : 799, "releaseDate": ISODate("2011-05-14"), "spec" : { "ram" : 4, "screen" : 6.5, "cpu" : 2.66 },"color":["white","black"],"storage":[64,128,256]},
+    { "_id" : 2, "name" : "xTablet", "price" : 899, "releaseDate": ISODate("2011-09-01") , "spec" : { "ram" : 16, "screen" : 9.5, "cpu" : 3.66 },"color":["white","black","purple"],"storage":[128,256,512]},
+    { "_id" : 3, "name" : "SmartTablet", "price" : 899, "releaseDate": ISODate("2015-01-14"), "spec" : { "ram" : 12, "screen" : 9.7, "cpu" : 3.66 },"color":["blue"],"storage":[16,64,128]},
+    { "_id" : 4, "name" : "SmartPad", "price" : 699, "releaseDate": ISODate("2020-05-14"),"spec" : { "ram" : 8, "screen" : 9.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256,1024]},
+    { "_id" : 5, "name" : "SmartPhone", "price" : 599,"releaseDate": ISODate("2022-09-14"), "spec" : { "ram" : 4, "screen" : 5.7, "cpu" : 1.66 },"color":["white","orange","gold","gray"],"storage":[128,256]}
+]);
+
+// $min evaluation (Will not modify if the current value is already lower)
+db.products.updateOne({ _id: 5 }, { $min: { price: 699 } });
+db.products.updateOne({ _id: 5 }, { $min: { price: 499 } });
+
+// $max evaluation (Will only update if the specified value is greater)
+db.products.updateOne({ _id: 1 }, { $max: { price: 699 } });
+db.products.updateOne({ _id: 1 }, { $max: { price: 899 } });
