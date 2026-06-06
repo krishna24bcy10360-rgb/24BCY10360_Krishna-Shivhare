@@ -1,0 +1,79 @@
+// =========================================================================
+// [06 JUNE 2026] - MongoDB Indexing Master Class (Single, Unique, Compound & Drop Management)
+// =========================================================================
+
+// 1. Database Context Selection and Index Auditing
+use vitbhopal;
+
+// Auditing default primary keys indexes (_id_) across active namespaces
+db.products.getIndexes();
+db.sales.getIndexes();
+
+
+// 2. Creating Single-Field Query Indexing
+db.sales.find(); // Verification check on active documents dataset
+db.sales.createIndex({ item: 1 });
+
+
+// 3. Resolving Index Specification Conflicts & Enforcing Uniqueness
+// Attempting unique creation directly on an existing indexed key causing IndexKeySpecsConflict error
+// Fix Sequence: Drop existing index first, clean duplicates if any, and redefine constraint
+db.sales.dropIndex("item_1");
+db.sales.deleteMany({}); // Purging dataset to prepare clean constraint layer
+
+// Enforcing strict uniquely mapped constraint configuration tracking
+db.sales.createIndex({ "item": 1 }, { unique: true });
+db.sales.getIndexes();
+
+
+// 4. Data Integrity Auditing via Single-Field Unique Constraints
+db.users.insertMany([
+   { email: "john@test.com", name: "john" },
+   { email: "jane@test.com", name: "jane" }
+]);
+
+db.users.createIndex({ email: 1 }, { unique: true });
+
+// Testing data validation safety (Triggers E11000 Duplicate Key Protection Engine)
+// db.users.insertOne({ email: "john@test.com", name: "johny" }); 
+
+// Handling DuplicateKey exception on live collection configurations
+db.users.drop();
+db.users.insertMany([
+   { email: "john@test.com", name: "john" },
+   { email: "john@test.com", name: "johny" }, // Pre-existing duplicate element block
+   { email: "jane@test.com", name: "jane" }
+]);
+
+// Attempting unique index assignment here throws DuplicateKey error until records are resolved
+db.users.deleteOne({ name: 'johny', email: 'john@test.com' }); // Resolving redundancy row context
+db.users.createIndex({ email: 1 }, { unique: true }); // Successful deployment validation
+
+
+// 5. Creating Compound Unique Indexes (Multi-Key Constraints Mapping)
+db.locations.insertOne({
+	address: "Downtown San Jose, CA, USA",
+	lat: 37.335480,
+	long: -121.893028
+});
+
+// Registering combined unique physical attributes to lock coordinate specifications
+db.locations.createIndex({ lat: 1, long: 1 }, { unique: true });
+
+// Validating distinct bounds allocation
+db.locations.insertOne({
+	address: "Dev Bootcamp, San Jose, CA, USA",
+	lat: 37.335480,
+	long: -122.893028 // Safe allocation - unique configuration boundary mismatch
+});
+
+// Testing composite overlap (Triggers E11000 Compound Constraint Blockage)
+// db.locations.insertOne({ address: "Central San Jose, CA, USA", lat: 37.335480, long: -121.893028 });
+
+
+// 6. Index Destructuring and Housekeeping Mechanics
+// Dropping indexes safely via accurate string namespace identifier reference
+db.sales.dropIndex("item_1"); 
+
+// Verifying absolute final cleanup state indices architecture maps
+db.sales.getIndexes();
