@@ -1,0 +1,36 @@
+// =========================================================================
+// [09 JUNE 2026] - MongoDB Replication Architecture & Replica Set Initiation
+// =========================================================================
+
+/* ============================================================================
+TROUBLESHOOTING NOTE FOR LAB EVALUATION:
+============================================================================
+The error "MongoServerError[NoReplicationEnabled]" occurs because the 
+mongod daemon process was initially launched as a standalone instance.
+
+To fix this before executing the deployment script below, all database 
+instances must be restarted from the terminal/command prompt with the 
+replicated cluster flag enabled:
+
+  mongod --port 27017 --dbpath "data/db1" --replSet "myReplSet"
+  mongod --port 27018 --dbpath "data/db2" --replSet "myReplSet"
+  mongod --port 27019 --dbpath "data/db3" --replSet "myReplSet"
+============================================================================
+*/
+
+// 1. Initiating the Core Replica Set High-Availability Architecture Cluster
+rs.initiate({
+    _id: "myReplSet",
+    members: [
+        { _id: 0, host: "localhost:27017" },
+        { _id: 1, host: "localhost:27018" },
+        { _id: 2, host: "localhost:27019" }
+    ]
+});
+
+// 2. Verification and Operational Cluster Configuration Auditing Commands
+// Checks the structural design parameters and nodes array status
+rs.conf();
+
+// Checks the runtime heartbeat state, syncing progress, and primary/secondary roles assignment
+rs.status();
