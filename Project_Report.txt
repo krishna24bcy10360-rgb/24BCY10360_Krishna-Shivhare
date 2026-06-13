@@ -1,0 +1,53 @@
+========================================================================
+    PROJECT SPECIFICATION REPORT: SMART FITNESS & DIET ORCHESTRATOR
+========================================================================
+
+1. GENERAL METADATA
+------------------------------------------------------------------------
+* Project Title      : Smart Fitness Tracker Ledger and Personal Diet Orchestrator
+* Domain             : Database Management Systems (NoSQL Persistence Middleware)
+* Architecture       : Java-to-MongoDB Native Synchronous Object Model
+* Interface Type     : Pure Interactive Console Terminal Driven Dashboard
+* Verification Tool  : Internal Integrated VS Code Console Terminal Logs
+
+2. CORE TECHNOLOGY STACK
+------------------------------------------------------------------------
+* Primary Language   : Java Standard Edition (JDK 17 or higher)
+* Database Engine    : MongoDB Enterprise Server (Local Instance v8.3)
+* Wire Protocol Port : localhost:27017
+* Connection URI     : mongodb://127.0.0.1:27017
+* Development IDE    : Visual Studio Code (VS Code)
+
+3. INTEGRATED DRIVERS & LIBRARIES (DEPENDENCIES)
+------------------------------------------------------------------------
+* mongodb-driver-sync : Executes native database commands (insertOne, updateMany).
+* bson                : Maps native Java objects directly into Binary JSON format.
+* mongodb-driver-core : Monitors local network routing and active connection states.
+
+4. STRUCTURAL DATA MODELS & MAPPING SCHEMA
+------------------------------------------------------------------------
+* Fitness_Departments Collection
+  -> Tracks physical gym layout units.
+  -> Document Schema: { _id, deptName, floor }
+
+* Gym_Staff Collection (One-to-Many Relationship)
+  -> Multiple trainers are mapped under one operational department.
+  -> Mapped via embedding the parent "deptId" inside the staff document.
+  -> Document Schema: { _id, name, role, deptId }
+
+* Diet_Plans Collection
+  -> Resource data catalog for nutritional allocations.
+  -> Document Schema: { _id, planName, durationWeeks }
+
+* Members Collection (Many-to-Many Relationship)
+  -> Active users tracking layer linked to shared diet resource pools.
+  -> Mapped using a dynamic string array "assignedPlans" holding multiple references.
+  -> Document Schema: { _id, name, age, active, assignedPlans: [] }
+
+5. TECHNICAL EXECUTION MECHANISMS
+------------------------------------------------------------------------
+* CRUD Operations     : Handles terminal inputs to drive creation, reads, and purges.
+* Atomic Modifiers    : Executes high-speed data updates using $set, $inc, and $unset.
+* Aggregation Engine  : Implements multi-stage ($group, $sum) reporting pipelines 
+                        to calculate total staff distribution metrics in real time.
+========================================================================
